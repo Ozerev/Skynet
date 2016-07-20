@@ -5,10 +5,9 @@ var markov = require('./markovbot');
 var trivia = require('./triviabot');
 var sounds = require('./voicebot');
 var yt = require('./ytbot');
-var Cleverbot = require('cleverbot-node');
 var creds = require('./credentials');
 var roll = require('./roll');
-var clbot = new Cleverbot;
+var cleverbot = require('./cleverreply');
 
 var rl = readLine.createInterface({
 	input: process.stdin,
@@ -154,16 +153,7 @@ bot.on("message", msg => {
 	}
 	
 	if (msg.isMentioned(bot.user)) {
-		var space = chatMsg.text.indexOf(" ");
-		if (space !== -1) {
-			var cleverMsg = chatMsg.text.substring(space, chatMsg.text.length).trim();
-			Cleverbot.prepare(function() {
-				clbot.write(cleverMsg, (response) => {
-					console.log("Responding " + response.message + " to " + cleverMsg);
-					chatMsg.reply(response.message);
-				});
-			});
-		}
+		cleverbot.reply(chatMsg);
 	}
 });
 
