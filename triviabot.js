@@ -14,8 +14,7 @@ var currentAnswer = "";
 var currentQuestion = "";
 var currentTimeout = {};
 var nextQTimeout = {};
-var currentBot = {};
-var currentChannel = {};
+var initMsg = {};
 var standings = {};
 var passStatus = {};
 
@@ -26,7 +25,7 @@ var blacklist =
 ];
 
 function printCorrectAnswer(answer, winner) {
-	currentBot.sendMessage(currentChannel, "Correct answer \"" + answer + "\" was given by " + winner);
+	initMsg.reply("Correct answer \"" + answer + "\" was given by " + winner);
 }
 
 function checkPass() {
@@ -38,7 +37,7 @@ function checkPass() {
 			npass++;
 		}
 	}
-	currentBot.sendMessage(currentChannel, "Pass (" + npass + "/" + nuser + ")");
+	initMsg.reply("Pass (" + npass + "/" + nuser + ")");
 	if (npass == nuser)
 		failQuestion();
 }
@@ -54,11 +53,11 @@ function printStandings() {
 	for(var entry in standings) {
 		txt += entry + ": " + standings[entry].score + "\n";
 	}
-	currentBot.sendMessage(currentChannel, txt);
+	initMsg.reply(txt);
 }
 
 function cancel() {
-	currentBot.sendMessage(currentChannel, "Trivia has ended, thanks for playing");
+	initMsg.reply("Trivia has ended, thanks for playing");
 	printStandings();
 	if (currentTimeout) 
 		clearTimeout(currentTimeout);
@@ -67,7 +66,7 @@ function cancel() {
 	currentQuestion = "";
 	currentAnswer = "";
 	currentTimeout = {};
-	currentChannel = {};
+	initMsg = {};
 	isRunning = false;
 }
 
@@ -108,14 +107,14 @@ function nextQuestion() {
 		currentQuestion = q;
 		currentAnswer = a;
 		var qstr = "Q (" + (questionIndex+1) + "/" + numQuestions + "): ";
-		currentBot.sendMessage(currentChannel, qstr + q);
+		initMsg.reply(qstr + q);
 		currentTimeout = setTimeout(failQuestion, 25000);
 		questionIndex++;
 	}
 }
 
 function failQuestion() {
-	currentBot.sendMessage(currentChannel, "No correct answer given, correct answer was " + currentAnswer);
+	initMsg.reply("No correct answer given, correct answer was " + currentAnswer);
 	currentQuestion = "";
 	currentAnswer = "";
 	if (currentTimeout)
@@ -125,20 +124,20 @@ function failQuestion() {
 }
 
 module.exports = {
-	handleCommand: function(cmd, bot, channel) {
-		var contents = cmd.split(" ");
+	handleCommand: function(chatMsg) {
+		var contents = chatMsg.text.split(" ");
 		if (contents.length >= 2) {
 			var triviaCmd = contents[1].toLowerCase();
+			
 			if (triviaCmd === "start" && !isRunning && contents.length === 3) {
 				var numQ = parseInt(contents[2]);
 				if (!isNaN(numQ)) {
-					if (numQ > 50)
-						numQ = 50;
+					if (numQ > 500)
+						numQ = 500;
 					if (numQ < 1)
 						numQ = 1;
-					bot.sendMessage(channel, "Starting trivia with " + numQ + " questions!");
-					currentBot = bot;
-					currentChannel = channel;
+					chatMsg.reply("Starting trivia with " + numQ + " questions!");
+					initMsg = chatMsg;
 					questionIndex = 0;
 					numQuestions = numQ;
 					standings = {};
@@ -146,47 +145,46 @@ module.exports = {
 					isRunning = true;
 					setTimeout(nextQuestion, 2000);
 				}
-			}
-			if (triviaCmd === "cancel" && isRunning && channel.id === currentChannel.id) {
+			} else if (triviaCmd === "cancel" && isRunning && chatMsg.channelId === initMsg.channelId) {
 				cancel();
 			}
 		}
 	},
 	
-	checkAnswer: function(answer, author, channel) {
+	checkAnswer: function(chatMsg) {
 		if (!isRunning) {
 			return;
 		}
 
-		if (channel.id !== currentChannel.id) {
+		if (chatMsg.channelId !== initMsg.channelId) {
 			return;
 		}
-		if (author === "Skynet") {
+		if (chatMsg.authorName === "Skynet") {
 			return;
 		}
 		
-		if (!(author in standings)) {
-			standings[author] = {};
-			standings[author].score = 0;
-			standings[author].pass = false;
+		if (!(chatMsg.authorName in standings)) {
+			standings[chatMsg.authorName] = {};
+			standings[chatMsg.authorName].score = 0;
+			standings[chatMsg.authorName].pass = false;
 		}
 		
 		if (currentQuestion) {
-			var givenAnswer = answer.trim().toLowerCase();
+			var givenAnswer = chatMsg.text.trim().toLowerCase();
 			
 			if (givenAnswer === "pass") {
-				standings[author].pass = true;
+				standings[chatMsg.authorName].pass = true;
 				checkPass();
 			} else {
 				var correct = currentAnswer.trim().toLowerCase();
 				var sim = ss.compareTwoStrings(givenAnswer, correct);
 				if (sim > 0.7) {
 					clearTimeout(currentTimeout);
-					printCorrectAnswer(currentAnswer.trim(), author);
+					printCorrectAnswer(currentAnswer.trim(), chatMsg.authorName);
 					currentQuestion = "";
 					currentAnswer = "";
 					currentTimeout = {};
-					standings[author].score++;
+					standings[chatMsg.authorName].score++;
 					printStandings();
 					setTimeout(nextQuestion, 2000);
 				}

@@ -62,6 +62,10 @@ function checkVoice() {
 	});
 }
 
+function reply(str) {
+	bot.sendMessage(this, str);
+}
+
 bot.on("ready", () => {
 	console.log(`Ready to begin! Serving in ${bot.channels.length} channels`);
 	
@@ -75,20 +79,38 @@ bot.on("disconnected", () => {
 	process.exit(1);
 });
 
+function createWriteFn(channel) {
+	return function(str) {
+		bot.sendMessage(channel, str);
+	};
+}
+
 function writeMessage(channel, text) {
 	bot.sendMessage(channel, text);
 }
 
+function createChatMessage(msg) {
+	return  {
+		text: msg.content,
+		authorName: msg.author.username,
+		channelId: msg.channel.id,
+		
+		reply: createWriteFn(msg)
+	};
+}
+
 bot.on("message", msg => {
-	trivia.checkAnswer(msg.content, msg.author.username, msg.channel);
+	var chatMsg = createChatMessage(msg);
+	trivia.checkAnswer(chatMsg);
 	
 	if (msg.content.toLowerCase().startsWith("!trivia")) {
-		trivia.handleCommand(msg.content, bot, msg.channel);
+		trivia.handleCommand(chatMsg);
 	}
 
 	if (msg.content.toLowerCase() === "dick") {
-		bot.sendMessage(msg, "båt");
+		msg.reply("båt");
 	}
+	
 	if (msg.content === "!fredag") {
 		bot.sendMessage(msg, "https://www.youtube.com/watch?v=kfVsfOSbJY0");
 	}
