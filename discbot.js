@@ -130,6 +130,8 @@ bot.on("message", msg => {
 				str += soundQueue[i].description + "\n";
 			}
 			chatMsg.reply(str);
+		} else {
+			chatMsg.reply("Queue is empty");
 		}
 	}
 	

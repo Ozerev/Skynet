@@ -12,19 +12,34 @@ function createSound(chatMsg, contents) {
 	}
 	progress[tag] = true;
 	console.log("Creating " + tag + " " + url);
-	var stream = ytdl(url, { filter: "audioonly" });
-	stream.on("error", (err) => {
-		console.log(err + " " + url);
-		chatMsg.reply("Failed creating " + tag + " - " + err);
-	})
-	var path = "D:\\YTSounds\\" + tag + ".mp3";
-	var write = stream.pipe(fs.createWriteStream("D:\\YTSounds\\" + tag + ".mp3"));
-	write.on("finish", () => {
-		console.log("Completed " + url);
-		delete progress[tag];
-		db[tag] = path;
-		fs.writeFile("yt.json", JSON.stringify(db));
-		chatMsg.reply("Created " + tag + " successfully");
+	ytdl.getInfo(url, (err,info) => {
+		if (err) {
+			chatMsg.reply("Failed creating " + tag + " - " + err);
+			delete progress[tag];
+			return;
+		}
+		var max_length = 5 * 60;
+		if (!info.length_seconds || info.length_seconds > max_length) {
+			chatMsg.reply("Failed creating " + tag + ", the video is too long");
+			delete progress[tag];
+			return;
+		}
+		var stream = ytdl(url, { filter: "audioonly" });
+		stream.on("error", (err) => {
+			console.log(err + " " + url);
+			chatMsg.reply("Failed creating " + tag + " - " + err);
+			delete progress[tag];
+			return;
+		});
+		var path = "D:\\YTSounds\\" + tag + ".mp3";
+		var write = stream.pipe(fs.createWriteStream("D:\\YTSounds\\" + tag + ".mp3"));
+		write.on("finish", () => {
+			console.log("Completed " + url);
+			delete progress[tag];
+			db[tag] = path;
+			fs.writeFile("yt.json", JSON.stringify(db));
+			chatMsg.reply("Created " + tag + " successfully");
+		});
 	});
 }
 
