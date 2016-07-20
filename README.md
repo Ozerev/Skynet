@@ -1,0 +1,2 @@
+# Skynet
+A Discord bot
