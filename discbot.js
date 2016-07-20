@@ -121,16 +121,22 @@ bot.on("message", msg => {
 		bot.voiceConnection.stopPlaying();
 	}
 	
-	if (chatMsg.text.startsWith("!yt")) {
-		yt.handleCommand(chatMsg, soundQueue);
+	if (msg.server && bot.voiceConnection && msg.server.id === bot.voiceConnection.server.id) {
+		if (chatMsg.text.startsWith("!yt")) {
+			yt.handleCommand(chatMsg, soundQueue);
+		}
+		if (chatMsg.text.startsWith("!dota")) {
+			sounds.addVoiceLine(chatMsg.text, soundQueue);
+		}
+		if (chatMsg.text === "!voiceleave") {
+			soundQueue = [];
+			bot.voiceConnection.stopPlaying();
+			bot.voiceConnection.destroy();
+		}
 	}
 	
 	if (chatMsg.text.startsWith("!voice")) {
 		joinVoice(msg);
-	}
-	
-	if (chatMsg.text.startsWith("!dota") && bot.voiceConnection) {
-		sounds.addVoiceLine(chatMsg.text, soundQueue);
 	}
 	
 	if (chatMsg.text.startsWith("!roll")) {
