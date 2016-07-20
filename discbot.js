@@ -27,9 +27,7 @@ function joinVoice(msg) {
 	console.log(contents.length);
 	if (contents.length >= 2) {
 		var chname = contents[1].toLowerCase();
-		console.log(chname + " " + bot.channels.length);
 		for (var i = 0; i < bot.channels.length; i++) {
-			console.log(bot.channels[i].type + " " + bot.channels[i].name + " " + chname);
 			if (bot.channels[i].type !== "voice")
 				continue;
 			if (bot.channels[i].server.id !== msg.server.id)
@@ -125,10 +123,7 @@ bot.on("message", msg => {
 	}
 	
 	if (chatMsg.text.startsWith("!yt")) {
-		var str = yt.handleCommand(msg.content, writeMessage, msg);
-		if (str) {
-			soundQueue.push(str);
-		}
+		yt.handleCommand(chatMsg, soundQueue);
 	}
 	
 	if (chatMsg.text.startsWith("!voice")) {
