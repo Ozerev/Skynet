@@ -81,10 +81,6 @@ function createWriteFn(channel, tts) {
 	};
 }
 
-function writeMessage(channel, text) {
-	bot.sendMessage(channel, text);
-}
-
 function createChatMessage(msg) {
 	return  {
 		text: msg.content,
