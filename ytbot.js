@@ -47,6 +47,7 @@ function deleteSound(chatMsg, contents) {
 	var tag = contents[2];
 	if (tag in db) {
 		delete db[tag];
+		fs.writeFile("yt.json", JSON.stringify(db));
 		chatMsg.reply("Deleted " + tag + " successfully");
 	}
 }
@@ -74,6 +75,12 @@ module.exports = {
 			var tag = contents[1];
 			if (tag === "list") {
 				listSounds(chatMsg);
+			} else if (tag === "random") {
+				var keys = [];
+				for (var k in db)
+					keys.push(k);
+				var index = Math.floor(Math.random() * keys.length);
+				soundQueue.push({ path: db[keys[index]], description: keys[index] });
 			} else {
 				if (tag in db) {
 					soundQueue.push({ path: db[tag], description: tag });
