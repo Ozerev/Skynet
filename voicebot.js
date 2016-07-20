@@ -10,24 +10,30 @@ function cleanMsg(str) {
 	return str.toLowerCase().trim().replace("'", "");
 }
 
+function findBestSound(soundName) {
+	var maxScore = 0.0;
+	var bestSound = null;
+	
+	for (var entry in db) {
+		var score =  ss.compareTwoStrings(soundName, db[entry]);
+		if (score > maxScore) {
+			maxScore = score;
+			bestSound = entry;
+		}
+	}
+	return bestSound;
+}
+
 module.exports = {
-	getVoicePath: function(command) {
-		var maxScore = 0.0;
-		var bestPath = null;
+	addVoiceLine: function(command, soundQueue) {
 		command = command.trim();
 		var splitIndex = command.indexOf(" ");
 		if (splitIndex === -1)
-			return null;
+			return;
 		var soundName = command.substring(splitIndex, command.length - 1).trim();
 		soundName = cleanMsg(soundName);
-		for (var entry in db) {
-			var score =  ss.compareTwoStrings(soundName, db[entry]);
-			if (score > maxScore) {
-				maxScore = score;
-				bestPath = entry;
-			}
-		}
-		console.log("Playing " + bestPath + " with score " + maxScore + " and desc " + db[bestPath]);
-		return bestPath;
+		var bestSound = findBestSound(soundName);
+		if (bestSound)
+			soundQueue.push(bestSound);
 	}
 };

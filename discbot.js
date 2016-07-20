@@ -24,7 +24,6 @@ function joinVoice(msg) {
 		bot.voiceConnection.destroy();
 	}
 	var contents = msg.content.split(" ");
-	console.log(contents.length);
 	if (contents.length >= 2) {
 		var chname = contents[1].toLowerCase();
 		for (var i = 0; i < bot.channels.length; i++) {
@@ -131,10 +130,7 @@ bot.on("message", msg => {
 	}
 	
 	if (chatMsg.text.startsWith("!dota") && bot.voiceConnection) {
-		var soundUrl = sounds.getVoicePath(chatMsg.text);
-		if (soundUrl) {
-			soundQueue.push(soundUrl);
-		}
+		sounds.addVoiceLine(chatMsg.text, soundQueue);
 	}
 	
 	if (chatMsg.text.startsWith("!roll")) {
