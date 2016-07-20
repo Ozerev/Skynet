@@ -124,6 +124,8 @@ bot.on("message", msg => {
 	if (chatMsg.text === "!queue") {
 		if (soundQueue.length > 0) {
 			var str = soundQueue.length + " sounds in queue: \n";
+			if (soundQueue.length === 1)
+				str = soundQueue.length + " sound in queue: \n";
 			for (var i = 0; i < soundQueue.length; i++) {
 				str += soundQueue[i].description + "\n";
 			}
