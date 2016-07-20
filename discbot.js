@@ -151,9 +151,7 @@ bot.on("message", msg => {
 	}
 	
 	if (chatMsg.text === "!ltd") {
-		legion.getLegionGames((global, euro) => {
-			chatMsg.reply("\n" + global + "\n" + euro);
-		});
+		legion.printLegionGames(chatMsg);
 	}
 	
 	if (chatMsg.text === "!spam") {
