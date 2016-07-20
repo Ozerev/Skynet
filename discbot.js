@@ -7,6 +7,7 @@ var sounds = require('./voicebot');
 var yt = require('./ytbot');
 var Cleverbot = require('cleverbot-node');
 var creds = require('./credentials');
+var roll = require('./roll');
 var clbot = new Cleverbot;
 
 var rl = readLine.createInterface({
@@ -130,24 +131,7 @@ bot.on("message", msg => {
 	}
 	
 	if (chatMsg.text.startsWith("!roll")) {
-		var min = 1;
-		var max = 100;
-		var contents = chatMsg.text.split(" ");
-		if (contents.length === 2) {
-			var range = contents[1].split("-");
-			if (range.length == 1) {
-				max = Math.max(min, parseInt(range[0]));
-			} else if (range.length == 2) {
-				min = parseInt(range[0]);
-				max = Math.max(min, parseInt(range[1]));
-			}
-		}
-		if (isNaN(min) || isNaN(max)) {
-			max = 100;
-			min = 1;
-		}
-		var rollValue = min + Math.round((max - min) * Math.random());
-		chatMsg.reply(chatMsg.authorName + " rolled " + rollValue +  " (" + min + "-" + max + ")");
+		roll.printRoll(chatMsg);
 	}
 	
 	if (chatMsg.text === "!ltd") {
