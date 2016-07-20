@@ -108,6 +108,10 @@ bot.on("message", msg => {
 		chatMsg.reply("https://www.youtube.com/watch?v=kfVsfOSbJY0");
 	}
 	
+	if (chatMsg.text === "!github") {
+		chatMsg.reply("https://github.com/Ozerev/Skynet");
+	}
+	
 	if (chatMsg.text === "!cancel" && bot.voiceConnection && bot.voiceConnection.playing) {
 		bot.voiceConnection.stopPlaying();
 	}
