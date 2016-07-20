@@ -157,6 +157,8 @@ bot.on("message", msg => {
 	}
 	
 	if (msg.isMentioned(bot.user)) {
+		var replaceStr = "<@" + bot.user.id + ">";
+		chatMsg.text = chatMsg.text.split(replaceStr).join("").trim();
 		cleverbot.reply(chatMsg);
 	}
 });
