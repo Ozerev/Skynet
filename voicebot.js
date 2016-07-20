@@ -13,15 +13,17 @@ function cleanMsg(str) {
 function findBestSound(soundName) {
 	var maxScore = 0.0;
 	var bestSound = null;
+	var bestDesc = null;
 	
 	for (var entry in db) {
 		var score =  ss.compareTwoStrings(soundName, db[entry]);
 		if (score > maxScore) {
 			maxScore = score;
 			bestSound = entry;
+			bestDesc = db[entry];
 		}
 	}
-	return bestSound;
+	return { path: bestSound, description: bestDesc };
 }
 
 module.exports = {
@@ -33,7 +35,7 @@ module.exports = {
 		var soundName = command.substring(splitIndex, command.length - 1).trim();
 		soundName = cleanMsg(soundName);
 		var bestSound = findBestSound(soundName);
-		if (bestSound)
+		if (bestSound.path)
 			soundQueue.push(bestSound);
 	}
 };

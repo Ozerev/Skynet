@@ -61,7 +61,7 @@ module.exports = {
 				listSounds(chatMsg);
 			} else {
 				if (tag in db) {
-					soundQueue.push(db[tag]);
+					soundQueue.push({ path: db[tag], description: tag });
 				}
 			}
 		}

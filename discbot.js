@@ -50,9 +50,9 @@ function checkVoice() {
 	var nextSound = soundQueue.shift();
 	var options = {};
 	options.volume = 0.25;
-	var intent = bot.voiceConnection.playFile(nextSound, options, (err,intent) => {
+	var intent = bot.voiceConnection.playFile(nextSound.path, options, (err,intent) => {
 		if (err)
-			console.log(err + " " + nextSound);
+			console.log(err + " " + nextSound.path);
 		intent.on("error", e => {
 			console.log("Error: " + e);
 		});
@@ -119,6 +119,16 @@ bot.on("message", msg => {
 	if (chatMsg.text === "!clear" && bot.voiceConnection && bot.voiceConnection.playing) {
 		soundQueue = [];
 		bot.voiceConnection.stopPlaying();
+	}
+	
+	if (chatMsg.text === "!queue") {
+		if (soundQueue.length > 0) {
+			var str = soundQueue.length + " sounds in queue: \n";
+			for (var i = 0; i < soundQueue.length; i++) {
+				str += soundQueue[i].description + "\n";
+			}
+			chatMsg.reply(str);
+		}
 	}
 	
 	if (msg.server && bot.voiceConnection && msg.server.id === bot.voiceConnection.server.id) {
