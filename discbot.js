@@ -62,10 +62,6 @@ function checkVoice() {
 	});
 }
 
-function reply(str) {
-	bot.sendMessage(this, str);
-}
-
 bot.on("ready", () => {
 	console.log(`Ready to begin! Serving in ${bot.channels.length} channels`);
 	
@@ -79,9 +75,12 @@ bot.on("disconnected", () => {
 	process.exit(1);
 });
 
-function createWriteFn(channel) {
+function createWriteFn(channel, tts) {
 	return function(str) {
-		bot.sendMessage(channel, str);
+		if (tts)
+			bot.sendTTSMessage(channel, str);
+		else
+			bot.sendMessage(channel, str);
 	};
 }
 
@@ -95,7 +94,8 @@ function createChatMessage(msg) {
 		authorName: msg.author.username,
 		channelId: msg.channel.id,
 		
-		reply: createWriteFn(msg)
+		reply: createWriteFn(msg),
+		replyTTS: createWriteFn(msg, true)
 	};
 }
 
@@ -103,49 +103,49 @@ bot.on("message", msg => {
 	var chatMsg = createChatMessage(msg);
 	trivia.checkAnswer(chatMsg);
 	
-	if (msg.content.toLowerCase().startsWith("!trivia")) {
+	if (chatMsg.text.startsWith("!trivia")) {
 		trivia.handleCommand(chatMsg);
 	}
 
-	if (msg.content.toLowerCase() === "dick") {
-		msg.reply("båt");
+	if (chatMsg.text === "dick") {
+		chatMsg.reply("båt");
 	}
 	
-	if (msg.content === "!fredag") {
-		bot.sendMessage(msg, "https://www.youtube.com/watch?v=kfVsfOSbJY0");
+	if (chatMsg.text === "!fredag") {
+		chatMsg.reply("https://www.youtube.com/watch?v=kfVsfOSbJY0");
 	}
 	
-	if (msg.content === "!cancel" && bot.voiceConnection && bot.voiceConnection.playing) {
+	if (chatMsg.text === "!cancel" && bot.voiceConnection && bot.voiceConnection.playing) {
 		bot.voiceConnection.stopPlaying();
 	}
 	
-	if (msg.content === "!clear" && bot.voiceConnection && bot.voiceConnection.playing) {
+	if (chatMsg.text === "!clear" && bot.voiceConnection && bot.voiceConnection.playing) {
 		soundQueue = [];
 		bot.voiceConnection.stopPlaying();
 	}
 	
-	if (msg.content.toLowerCase().startsWith("!yt")) {
+	if (chatMsg.text.startsWith("!yt")) {
 		var str = yt.handleCommand(msg.content, writeMessage, msg);
 		if (str) {
 			soundQueue.push(str);
 		}
 	}
 	
-	if (msg.content.toLowerCase().startsWith("!voice")) {
+	if (chatMsg.text.startsWith("!voice")) {
 		joinVoice(msg);
 	}
 	
-	if (msg.content.toLowerCase().startsWith("!dota") && bot.voiceConnection) {
-		var soundUrl = sounds.getVoicePath(msg.content);
+	if (chatMsg.text.startsWith("!dota") && bot.voiceConnection) {
+		var soundUrl = sounds.getVoicePath(chatMsg.text);
 		if (soundUrl) {
 			soundQueue.push(soundUrl);
 		}
 	}
 	
-	if (msg.content.startsWith("!roll")) {
+	if (chatMsg.text.startsWith("!roll")) {
 		var min = 1;
 		var max = 100;
-		var contents = msg.content.split(" ");
+		var contents = chatMsg.text.split(" ");
 		if (contents.length === 2) {
 			var range = contents[1].split("-");
 			if (range.length == 1) {
@@ -160,16 +160,16 @@ bot.on("message", msg => {
 			min = 1;
 		}
 		var rollValue = min + Math.round((max - min) * Math.random());
-		bot.sendMessage(msg, msg.author.username + " rolled " + rollValue +  " (" + min + "-" + max + ")");
+		chatMsg.reply(chatMsg.authorName + " rolled " + rollValue +  " (" + min + "-" + max + ")");
 	}
 	
-	if (msg.content.toLowerCase() === "!ltd") {
+	if (chatMsg.text === "!ltd") {
 		legion.getLegionGames((global, euro) => {
-			bot.sendMessage(msg, "\n" + global + "\n" + euro);
+			chatMsg.reply("\n" + global + "\n" + euro);
 		});
 	}
 	
-	if (msg.content.toLowerCase() == "!spam") {
+	if (chatMsg.text === "!spam") {
 		var possible = "bcdfghjklmnpqrstvwxz";
 		var length = 5 + Math.round(100 * Math.random());
 		var text = "";
@@ -177,21 +177,21 @@ bot.on("message", msg => {
 			text += possible.charAt(Math.round(Math.random() * possible.length));
 		}
 		text += "i";
-		bot.sendTTSMessage(msg, text);
+		chatMsg.replyTTS(text);
 	}
 	
-	if (msg.content.toLowerCase().startsWith("!harry")) {
-		bot.sendTTSMessage(msg, markov.handleCommand(msg.content));
+	if (chatMsg.text.startsWith("!harry")) {
+		chatMsg.replyTTS(markov.handleCommand(chatMsg.text));
 	}
 	
 	if (msg.isMentioned(bot.user)) {
-		var space = msg.content.indexOf(" ");
+		var space = chatMsg.text.indexOf(" ");
 		if (space !== -1) {
-			var cleverMsg = msg.content.substring(space, msg.content.length).trim();
+			var cleverMsg = chatMsg.text.substring(space, chatMsg.text.length).trim();
 			Cleverbot.prepare(function() {
 				clbot.write(cleverMsg, (response) => {
 					console.log("Responding " + response.message + " to " + cleverMsg);
-					bot.sendMessage(msg, response.message);
+					chatMsg.reply(response.message);
 				});
 			});
 		}
