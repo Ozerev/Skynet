@@ -80,7 +80,7 @@ module.exports = {
 				for (var k in db)
 					keys.push(k);
 				var index = Math.floor(Math.random() * keys.length);
-				soundQueue.push({ path: db[keys[index]], description: keys[index] });
+				soundQueue.push({ path: db[keys[index]], description: "random" });
 			} else {
 				if (tag in db) {
 					soundQueue.push({ path: db[tag], description: tag });

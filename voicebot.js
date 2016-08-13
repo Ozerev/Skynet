@@ -1,6 +1,11 @@
 var ss = require('string-similarity');
 var fs = require('fs');
 var db = JSON.parse(fs.readFileSync('dotadb.json', 'utf8'));
+var extraDb = JSON.parse(fs.readFileSync('extrasounds.json', 'utf8'));
+
+for (var entry in extraDb) {
+	db[entry] = extraDb[entry];
+}
 
 for (var entry in db) {
 	var pathContents = entry.split("\\");

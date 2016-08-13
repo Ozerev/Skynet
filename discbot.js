@@ -50,6 +50,7 @@ function checkVoice() {
 	var nextSound = soundQueue.shift();
 	var options = {};
 	options.volume = 0.25;
+	console.log("play " + nextSound.path);
 	var intent = bot.voiceConnection.playFile(nextSound.path, options, (err,intent) => {
 		if (err)
 			console.log(err + " " + nextSound.path);
@@ -98,10 +99,6 @@ bot.on("message", msg => {
 	
 	if (chatMsg.text.startsWith("!trivia")) {
 		trivia.handleCommand(chatMsg);
-	}
-
-	if (chatMsg.text === "dick") {
-		chatMsg.reply("båt");
 	}
 	
 	if (chatMsg.text === "!fredag") {
